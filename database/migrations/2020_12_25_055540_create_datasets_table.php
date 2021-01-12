@@ -15,12 +15,11 @@ class CreateDatasetsTable extends Migration
     public function up()
     {
         Schema::create('datasets', function (Blueprint $table) {
-            $table->id();
-            $table->integer('category_id');
-            $table->longText('text');
-            $table->longText('textPrepro');
-            $table->string('label');            
-            $table->timestamps();
+            $table->id();            
+            $table->string('text',320);
+            $table->string('text_prepro',320);
+            $table->enum('label',['senang','sedih','marah','cinta','takut']);
+            $table->enum('type',['training','testing']);            
         });
     }
 

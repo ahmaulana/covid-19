@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DetailTweet;
+use App\Models\Classification;
 use Carbon\Carbon;
-use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,8 +16,8 @@ class ChartController extends Controller
         $count_days = $start_date->diffInDays($end_date) + 1;
         $date = Carbon::parse($start_date)->toDateTimeString();
         for ($i = 0; $i < $count_days; $i++) {
-            $emotion_list = DetailTweet::select('label', DB::raw('count(*) as total'))
-                ->whereDate('created_at', '=', $date)->groupBy('label')
+            $emotion_list = Classification::select('emotion', DB::raw('count(*) as total'))
+                ->join('tweets','tweet_id','tweets.id')->whereDate('created_at', '=', $date)->groupBy('emotion')
                 ->get();
             $emotions[0][] = (isset($emotion_list[0]->total) ? $emotion_list[0]->total : 0);
             $emotions[1][] = (isset($emotion_list[1]->total) ? $emotion_list[1]->total : 0);

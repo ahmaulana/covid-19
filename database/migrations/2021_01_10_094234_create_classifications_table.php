@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDetailTweetsTable extends Migration
+class CreateClassificationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateDetailTweetsTable extends Migration
      */
     public function up()
     {
-        Schema::create('detail_tweets', function (Blueprint $table) {
+        Schema::create('classifications', function (Blueprint $table) {
             $table->id();
-            $table->integer("tweet_id");            
-            $table->string("label"); 
-            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->integer('tweet_id');
+            $table->integer('model_id');            
+            $table->enum('emotion',['senang','sedih','marah','cinta','takut']);            
         });
     }
 
@@ -28,6 +28,6 @@ class CreateDetailTweetsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('detail_tweets');
+        Schema::dropIfExists('classifications');
     }
 }

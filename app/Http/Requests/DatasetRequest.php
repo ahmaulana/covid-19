@@ -25,9 +25,8 @@ class DatasetRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'category' => 'required|min:3|max:20',
-            'dataset' => 'required|mimes:xlsx,xls'
+        return [            
+            'dataset' => 'required|mimes:xlsx,xls|size:5120',
         ];
     }
 
@@ -50,12 +49,10 @@ class DatasetRequest extends FormRequest
      */
     public function messages()
     {
-        return [
-            'category.required' => 'Kategori tidak boleh kosong!',
-            'category.min' => 'Kategori minimal 3 karakter!',
-            'category.max' => 'Kategori maksimal 20 karakter!',            
+        return [                
             'dataset.required' => 'Dataset tidak boleh kosong!',
-            'dataset.mimes' => 'Format file harus berekstensi xlsx atau xls',
+            'dataset.mimes' => 'Format file harus berekstensi xlsx atau xls!',  
+            'dataset.size' => 'Ukuran file tidak boleh lebih dari 5mb!'
         ];
     }
 }

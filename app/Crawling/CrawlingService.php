@@ -3,7 +3,7 @@
 namespace App\Crawling;
 
 use App\Events\ChartEvent;
-use App\Models\DetailTweet;
+use App\Models\Classification;
 use App\Models\DModel;
 use App\Models\Tweet;
 use App\Preprocessing\PreprocessingService;
@@ -41,34 +41,35 @@ class CrawlingService
         $tweet_after_prepro = PreprocessingService::index($full_text);
 
         //Last record for pusher
-        $last = DetailTweet::select("created_at")->latest()->first();                                
+        $last = Tweet::select("created_at")->latest()->first();
 
         //Choose model
-        $model = DModel::select('id', 'model_name')->orderBy('id', 'DESC')->first();
+        $model = DModel::select('id', 'model_name')->where('actived',1)->first();
         $estimator = PersistentModel::load(new Filesystem(storage_path() . '/model/' . $model->model_name . '.model'));
         if (count($filter_tweet) === count($tweet_after_prepro)) {
             foreach ($filter_tweet as $key => $tweet) {
                 $insert_tweet = new Tweet;
-                $insert_prediction = new DetailTweet;
-                $insert_tweet->d_model_id = $model->id;
+                $insert_classification = new Classification;                
                 $insert_tweet->post_id = $tweet['post_id'];
                 $insert_tweet->username = $tweet['username'];
                 $insert_tweet->tweet = $tweet['tweet'];
-                $insert_tweet->tweet_prepro = $tweet_after_prepro[$key];
+                $insert_tweet->tweet_prepro = $tweet_after_prepro[$key]['result'];
+                $insert_tweet->word_cloud = $tweet_after_prepro[$key]['word_cloud'];
+                $insert_tweet->created_at = $tweet['created_at'];
                 $insert_tweet->save();
 
-                // Prediction
-                $emotion = $estimator->predictSample([$tweet_after_prepro[$key]]);
+                // Classification
+                $emotion = $estimator->predictSample([$tweet_after_prepro[$key]['result']]);
 
-                $insert_prediction->label = $emotion;
-                $insert_prediction->created_at = $tweet['created_at'];
-                $insert_tweet->detail_tweet()->save($insert_prediction);
+                $insert_classification->model_id = $model->id;
+                $insert_classification->emotion = $emotion;
+                $insert_tweet->classification()->save($insert_classification);
             }
         }
         //Count The Emotions
         $now = Carbon::now()->toDateTimeString();
-        $emotion_list = DetailTweet::select('label', DB::raw('count(*) as total'))
-            ->whereBetween('created_at', [$last->created_at,$now])->groupBy('label')
+        $emotion_list = Classification::select('emotion', DB::raw('count(*) as total'))
+            ->join('tweets','tweet_id','tweets.id')->whereBetween('created_at', [$last->created_at,$now])->groupBy('emotion')
             ->get();
         $emotions[] = (isset($emotion_list[0]->total) ? $emotion_list[0]->total : 0);
         $emotions[] = (isset($emotion_list[1]->total) ? $emotion_list[1]->total : 0);
@@ -77,8 +78,8 @@ class CrawlingService
         $emotions[] = (isset($emotion_list[4]->total) ? $emotion_list[4]->total : 0);        
 
         //Total Emotion
-        $total_emotion = DetailTweet::select(DB::raw('count(*) as total'))
-        ->groupBy('label')
+        $total_emotion = Classification::select(DB::raw('count(*) as total'))
+        ->groupBy('emotion')
         ->get()->toArray();        
         event(new ChartEvent(['label' => Carbon::now()->addSecond(30)->toDateTimeString(),'emotion' => $emotions,'total' => $total_emotion]));
     }

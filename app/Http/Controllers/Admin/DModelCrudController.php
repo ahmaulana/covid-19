@@ -34,7 +34,7 @@ class DModelCrudController extends CrudController
         CRUD::setModel(\App\Models\DModel::class);
         CRUD::setRoute(config('backpack.base.route_prefix') . '/dmodel');
         CRUD::setEntityNameStrings('Model', 'Model');
-        CRUD::orderBy('id', 'ASC');
+        CRUD::orderBy('actived', 'DESC');
     }
 
     /**
@@ -44,21 +44,22 @@ class DModelCrudController extends CrudController
      * @return void
      */
     protected function setupListOperation()
-    {
-
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
-
+    {        
         CRUD::column('id');
-        CRUD::column('model_name');        
-        CRUD::column('data_split');
-        CRUD::column('accuracy');
-        $this->crud->denyAccess('update');
-        $this->crud->denyAccess('show');
+        CRUD::addColumn([
+            'name' => 'model_name',
+            'label' => 'Model',
+        ]);
+        CRUD::addColumn([
+            'name' => 'accuracy',
+            'label' => 'Akurasi',
+        ]);
+        CRUD::addColumn([
+            'name' => 'actived',
+            'label' => 'Status',
+            'type' => 'boolean',
+            'options' => [0 => 'Tidak Aktif', 1 => 'Aktif']
+        ]);
     }
 
     /**
@@ -71,28 +72,11 @@ class DModelCrudController extends CrudController
     {
         CRUD::setValidation(DModelRequest::class);
 
-
-
         /**
          * Fields can be defined using the fluent syntax or array syntax:
          * - CRUD::field('price')->type('number');
          * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
          */
-
-        CRUD::addfield([  // Select
-            'label'     => "Kategori Dataset",
-            'type'      => 'select',
-            'name'      => 'category_id', // the db column for the foreign key
-
-            // optional 
-            // 'entity' should point to the method that defines the relationship in your Model
-            // defining entity will make Backpack guess 'model' and 'attribute'
-            'entity'    => 'category',
-
-            // optional - manually specify the related model and attribute
-            'model'     => "App\Models\Category", // related model
-            'attribute' => 'category', // foreign key attribute that is shown to user
-        ]);
 
         CRUD::addfield([
             'name' => 'model_name',
@@ -109,21 +93,9 @@ class DModelCrudController extends CrudController
             'type'  => 'textarea'
         ]);
 
-        CRUD::addfield([   // Number
-            'name' => 'data_split',
-            'label' => 'Persentase Data Training',
-            'type' => 'number',
-
-            // optionals
-            'attributes' => [
-                'placeholder' => 'Min: 50%, Max:90% '
-            ], // allow decimals            
-            'suffix'     => "%",
-        ]);
-
         CRUD::replaceSaveActions(
             [
-                'name' => 'Simpan',
+                'name' => 'Buat Model',
                 'visible' => function ($crud) {
                     return true;
                 },
@@ -142,7 +114,42 @@ class DModelCrudController extends CrudController
      */
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+
+        CRUD::addField([
+            'name' => 'model_name',
+            'label' => 'Nama Model',
+            'attributes' => [
+                'readonly' => 'readonly'
+            ]
+        ]);
+        CRUD::addField([
+            'type' => 'textarea',
+            'name' => 'model_desc',
+            'label' => 'Deskripsi',
+        ]);
+        CRUD::addField([
+            'type' => 'select_from_array',
+            'name' => 'actived',
+            'label' => 'Status',
+            'options' => [1 => 'Aktifkan', 0 => 'Tidak Aktif']
+        ]);
+
+        CRUD::replaceSaveActions(
+            [
+                'name' => 'Update Model',
+                'visible' => function ($crud) {
+                    return true;
+                },
+                'redirect' => function ($crud, $request, $itemId) {
+                    return $crud->route;
+                },
+            ],
+        );
+    }
+
+    protected function setupShowOperation()
+    {
+        $this->crud->denyAccess('delete');
     }
 
     public function store(DmodelRequest $request)
@@ -152,10 +159,42 @@ class DModelCrudController extends CrudController
         return \Redirect::to($this->crud->route);
     }
 
+    public function update($id)
+    {
+        $status = DModel::find($id);
+        if ($status->actived == 1) {
+            \Alert::add('danger', 'Tidak dapat memperbarui model aktif!')->flash();
+            return \Redirect::to($this->crud->route);
+        }
+
+        //Actived the new one        
+        if (request()->actived == 1) {
+            DModel::where('actived', 1)
+                ->update([
+                    'actived' => 0
+                ]);
+        }
+
+        DModel::find($id)
+            ->update([
+                'model_desc' => request()->model_desc,
+                'actived' => request()->actived
+            ]);
+
+        \Alert::add('success', 'Model berhasil diperbarui!')->flash();
+        return \Redirect::to($this->crud->route);
+    }
+
     public function destroy($id)
-    {                
-        $model_name = DModel::select('model_name')->where('id',$id)->first();
-        unlink(storage_path() . '/model/' . $model_name->model_name . '.model');        
+    {
+        $model_name = DModel::select('model_name', 'actived')->where('id', $id)->first();
+        //Cek aktif
+        if ($model_name->actived == 1) {
+            \Alert::add('danger', 'Tidak dapat menghapus model aktif!')->flash();
+            return false;
+        }
+
+        unlink(storage_path() . '/model/' . $model_name->model_name . '.model');
         $this->crud->hasAccessOrFail('delete');
 
         return $this->crud->delete($id);

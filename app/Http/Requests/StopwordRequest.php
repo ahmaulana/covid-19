@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Requests\Request;
 use Illuminate\Foundation\Http\FormRequest;
 
-class DModelRequest extends FormRequest
+class StopwordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,8 +26,7 @@ class DModelRequest extends FormRequest
     public function rules()
     {
         return [
-            'model_name' => 'required|unique:d_models|max:20',
-            'model_desc' => 'max:280',            
+            'stopword' => 'required|max:32|unique:stopwords'
         ];
     }
 
@@ -51,10 +50,9 @@ class DModelRequest extends FormRequest
     public function messages()
     {
         return [
-            'model_name.required' => 'Nama model tidak boleh kosong!',
-            'model_name.unique' => 'Nama model sudah digunakan!',
-            'model_name.max' => 'Nama tidak boleh lebih dari 20 karakter!',
-            'model_desc.max' => 'Panjang deskripsi maksimal 280 karakter!',
+            'stopword.required' => 'Stopword tidak boleh kosong!',
+            'stopword.unique' => 'Stopword sudah ada!',
+            'stopword.max' => 'Stopword tidak boleh lebih dari 32 karakter!',
         ];
     }
 }

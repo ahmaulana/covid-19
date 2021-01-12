@@ -15,12 +15,13 @@ class CreateTweetsTable extends Migration
     public function up()
     {
         Schema::create('tweets', function (Blueprint $table) {
-            $table->id();
-            $table->integer("d_model_id");
+            $table->id();            
             $table->string("post_id");
             $table->string("username");
-            $table->longText("tweet");
-            $table->longText("tweet_prepro");            
+            $table->string("tweet",320);
+            $table->string("tweet_prepro",320);
+            $table->string("word_cloud",320);
+            $table->timestamp("created_at");
         });
     }
 

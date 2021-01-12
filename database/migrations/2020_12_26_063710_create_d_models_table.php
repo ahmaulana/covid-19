@@ -14,12 +14,11 @@ class CreateDModelsTable extends Migration
     public function up()
     {
         Schema::create('d_models', function (Blueprint $table) {
-            $table->id();
-            $table->integer('category_id');
-            $table->string('model_name');
-            $table->longText('model_desc')->nullable();
-            $table->float('data_split');
+            $table->id();            
+            $table->string('model_name',32);
+            $table->string('model_desc',280)->nullable();            
             $table->float('accuracy');
+            $table->boolean('actived')->default(0);
             $table->timestamps();
         });
     }

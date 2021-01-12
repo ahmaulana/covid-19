@@ -11,13 +11,20 @@ class Tweet extends Model
     use HasFactory;
     public $timestamps = false;
     
-    public function detail_tweet()
+    public function classification()
     {
-        return $this->hasOne(DetailTweet::class);
+        return $this->hasOne(Classification::class);
     }    
 
-    public function tweet_created()
+    public function d_model()
     {
-        return $this->hasOne(DetailTweet::class);
-    }    
+        return $this->hasOne(DModel::class);
+    }
+
+    public function delete()
+    {
+        $this->classification()->delete();
+
+        return parent::delete();
+    }
 }

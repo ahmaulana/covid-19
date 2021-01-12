@@ -2,13 +2,9 @@
 
 namespace App\Imports;
 
-use App\Models\Category;
 use App\Models\Dataset;
-use Illuminate\Support\Collection;
 use App\Preprocessing\PreprocessingService;
-use Illuminate\Auth\Events\Validated;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
@@ -22,13 +18,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class DatasetsImport implements ToModel, WithValidation, WithBatchInserts, WithHeadingRow, WithChunkReading, ShouldQueue, SkipsOnError, SkipsOnFailure
 {
-    use Importable, SkipsFailures, SkipsErrors;
-    protected $category;
-
-    public function __construct($category)
-    {
-        $this->category = Category::create(['category' => $category]);
-    }
+    use Importable, SkipsFailures, SkipsErrors;    
 
     /**
      * @param array $row
@@ -37,21 +27,22 @@ class DatasetsImport implements ToModel, WithValidation, WithBatchInserts, WithH
      */
     public function model(array $row)
     {
-        $prepro_train = PreprocessingService::index([$row['text']]);         
+        $prepro_train = PreprocessingService::index([$row['text']]);                
 
-        $dataset = $this->category->datasets()->create([
+        return new Dataset([
             'text' => $row['text'],
-            'textPrepro' => $prepro_train[0],
-            'label' => $row['label']
+            'text_prepro' => $prepro_train[0]['result'],            
+            'label' => $row['label'],
+            'type' => $row['type']
         ]);
-        return $dataset;
     }
 
     public function rules(): array
     {
         return [
-            'text' => 'required|max:280',
-            'label' => 'required|max:20'
+            'text' => 'required|max:320',
+            'label' => 'required',
+            'type' => 'required'
         ];
     }
 

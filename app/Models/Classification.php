@@ -5,10 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DModel extends Model
+class Classification extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
-    protected $fillable = ['model_name','model_desc','accuracy','actived'];
-    
+    public $timestamps = false;
+
+    public function tweet()
+    {
+        return $this->belongsTo(Tweet::class);
+    }
 }
+

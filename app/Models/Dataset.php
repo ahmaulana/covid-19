@@ -10,12 +10,8 @@ class Dataset extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
-    protected $fillable = ['text','textPrepro','label'];
-
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
+    public $timestamps = false;
+    protected $fillable = ['text','text_prepro','label','type'];
 
     public function downloadTemplate($crud = false)
     {

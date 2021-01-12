@@ -19,7 +19,7 @@ class TweetCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\CreateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
-    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;    
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;    
 
     /**
@@ -31,7 +31,8 @@ class TweetCrudController extends CrudController
     {
         CRUD::setModel(\App\Models\Tweet::class);
         CRUD::setRoute('/tweet');
-        CRUD::setEntityNameStrings('tweet', 'tweets');
+        CRUD::setEntityNameStrings('tweet', 'tweet');
+        CRUD::orderBy('id', 'ASC');
     }
 
     /**
@@ -42,44 +43,52 @@ class TweetCrudController extends CrudController
      */
     protected function setupListOperation()
     {        
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
         CRUD::column('id');
         CRUD::column('tweet');
-        CRUD::addColumn([
-            // any type of relationship
-            'name'         => 'detail_tweet', // name of relationship method in the model
+        CRUD::addColumn([            
+            'name'         => 'classification',
             'type'         => 'relationship',
-            'label'        => 'Label', // Table column heading
-            // OPTIONAL
-            // 'entity'    => 'detail_tweet', // the method that defines the relationship in your Model
-            'attribute' => 'label', // foreign key attribute that is shown to user
-            // 'model'     => App\Models\DetailTweet::class, // foreign key model
+            'label'        => 'Emosi',            
+            'attribute' => 'emotion',            
         ]);
+        CRUD::column('created_at');
         $this->crud->denyAccess('update');
-        $this->crud->denyAccess('delete');        
-        $this->crud->denyAccess('create');        
+        if (backpack_auth()->guest()) {
+            $this->crud->denyAccess('delete');
+        }
+        $this->crud->denyAccess('create');
 
         // Filter Label
-        $this->crud->addFilter([
-            'type' => 'dropdown',
-            'name' => 'label',
-            'label' => 'Emosi',
-        ],
-        function() {
-            return Tweet::select('label')->join('detail_tweets','tweets.id','=','tweet_id')->distinct()->get()->pluck('label', 'label')->toArray();
-        },
-        function($value) {            
-            $this->value = $value;
-            $this->crud->addClause('join','detail_tweets', function($query){
-                $query->on('tweets.id', '=', 'tweet_id')
-                       ->where('label', '=', $this->value);
-            });
-        });
+        $this->crud->addFilter(
+            [
+                'type' => 'dropdown',
+                'name' => 'emotion',
+                'label' => 'Emosi',
+            ],
+            function () {
+                return Tweet::select('emotion')->join('classifications', 'tweets.id', '=', 'tweet_id')->distinct()->get()->pluck('emotion', 'emotion')->toArray();
+            },
+            function ($value) {
+                $this->value = $value;                
+                $query = Tweet::join('classifications','tweets.id','=','tweet_id')->where('emotion',$value);
+                return $this->crud->query = $query;                
+            }
+        );
+
+        // Filter Tanggal
+        $this->crud->addFilter(
+            [
+                'type' => 'date_range',
+                'name' => 'created_at',
+                'label' => 'Filter Tanggal',
+            ],
+            false,
+            function ($value) {                
+                $dates = json_decode($value);
+                $this->crud->addClause('where', 'created_at', '>=', $dates->from);
+                $this->crud->addClause('where', 'created_at', '<=', $dates->to);
+            }
+        );
     }
 
     /**
@@ -91,8 +100,6 @@ class TweetCrudController extends CrudController
     protected function setupCreateOperation()
     {
         CRUD::setValidation(TweetRequest::class);
-
-
 
         /**
          * Fields can be defined using the fluent syntax or array syntax:
@@ -120,29 +127,33 @@ class TweetCrudController extends CrudController
             'label' => 'Tweet ID'
         ]);
         $this->crud->addColumn([
+            'name' => 'username',
+            'label' => 'Username'
+        ]);
+        $this->crud->addColumn([
             'name' => 'tweet',
             'label' => 'Tweet'
-        ]);                        
+        ]);
+        $this->crud->addColumn([
+            'name' => 'tweet_prepro',
+            'label' => 'Tweet Prepro'
+        ]);                
         CRUD::addColumn([
             // any type of relationship
-            'name'         => 'detail_tweet', // name of relationship method in the model
+            'name'         => 'classification', // name of relationship method in the model
             'type'         => 'relationship',
-            'label'        => 'Label', // Table column heading
+            'label'        => 'Emosi', // Table column heading
             // OPTIONAL
             // 'entity'    => 'detail_tweet', // the method that defines the relationship in your Model
-            'attribute' => 'label', // foreign key attribute that is shown to user
-            // 'model'     => App\Models\DetailTweet::class, // foreign key model
-        ]);        
-        CRUD::addColumn([
-            // any type of relationship
-            'name'         => 'tweet_created', // name of relationship method in the model
-            'type'         => 'relationship'    ,
-            'label'        => 'Tanggal', // Table column heading
-            // OPTIONAL
-            // 'entity'    => 'detail_tweet', // the method that defines the relationship in your Model
-            'attribute' => 'created_at', // foreign key attribute that is shown to user
+            'attribute' => 'emotion', // foreign key attribute that is shown to user
             // 'model'     => App\Models\DetailTweet::class, // foreign key model
         ]);
+
+        $this->crud->addColumn([
+            'name' => 'created_at',
+            'label' => 'Tanggal'
+        ]);
+        
         $this->crud->denyAccess('delete');
-    }
+    }        
 }

@@ -25,7 +25,7 @@ use Rubix\ML\Transformers\WordCountVectorizer;
 class ModelJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $samples, $labels, $data;
+    protected $trainingSamples, $trainingLabels, $testingSamples, $testingLabels, $data;
 
     /**
      * Create a new job instance.
@@ -34,12 +34,11 @@ class ModelJob implements ShouldQueue
      */
     public function __construct($data)
     {
-        $this->samples = [];
-        $this->labels = [];
-        $this->data = $data;  
-        
-        //Convert data split to float
-        $this->data['data_split'] = $this->data['data_split']/100;                        
+        $this->trainingSamples = [];
+        $this->trainingLabels = [];
+        $this->testingSamples = [];
+        $this->testingLabels = [];
+        $this->data = $data;              
     }
 
     /**
@@ -49,13 +48,24 @@ class ModelJob implements ShouldQueue
      */
     public function handle()
     {
-        $data = Dataset::select('textPrepro', 'label')->take(50)->get();
-        foreach ($data as $train) {
-            $this->samples[] = [$train->textPrepro];
-            $this->labels[] = $train->label;
+        $trainings = Dataset::select('text_prepro', 'label')->where('type','training')->get();
+        $testings = Dataset::select('text_prepro', 'label')->where('type','testing')->get();
+
+        //Training
+        foreach ($trainings as $training) {
+            $this->trainingSamples[] = [$training->text_prepro];
+            $this->trainingLabels[] = $training->label;
         }
-        $dataset = Labeled::build($this->samples, $this->labels);
-        [$training, $testing] = $dataset->stratifiedSplit($this->data['data_split']);
+        
+        //Testing
+        foreach ($testings as $testing) {
+            $this->testingSamples[] = [$testing->text_prepro];
+            $this->testingLabels[] = $testing->label;
+        }
+
+        $training = Labeled::build($this->trainingSamples, $this->trainingLabels);
+        $testing = Labeled::build($this->testingSamples, $this->testingLabels);
+        
         $estimator = new PersistentModel(
             new Pipeline([
                 new WordCountVectorizer(10000, 3, 10000, new NGram(1, 2)),
@@ -64,7 +74,7 @@ class ModelJob implements ShouldQueue
             new Filesystem(storage_path() . '/model/' . $this->data['model_name'] . '.model', true)
         );
 
-        $estimator->train($training);        
+        $estimator->train($training);
 
         $predictions = $estimator->predict($testing);
 
@@ -76,13 +86,15 @@ class ModelJob implements ShouldQueue
         $results = $report->generate($predictions, $testing->labels());
         $estimator->save();
 
+        //Check Active Model
+        $actived = DModel::count() == 0 ? 1 : 0;
+
         //Save to DB
-        $fix_model = DModel::create([
-            'category_id' => $this->data['category_id'],
+        $fix_model = DModel::create([        
             'model_name' => $this->data['model_name'],
             'model_desc' => $this->data['model_desc'],
-            'data_split' => $this->data['data_split'],
-            'accuracy' => $results[0]['overall']['accuracy']
+            'accuracy' => $results[0]['overall']['accuracy'],
+            'actived' => $actived
         ]);
     }
 }

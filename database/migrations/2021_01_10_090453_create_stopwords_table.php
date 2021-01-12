@@ -1,11 +1,10 @@
 <?php
 
-use App\Models\Dataset;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCategoriesTable extends Migration
+class CreateStopwordsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,9 +13,9 @@ class CreateCategoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('stopwords', function (Blueprint $table) {
             $table->id();
-            $table->string('category');            
+            $table->string('stopword',24);
         });
     }
 
@@ -27,6 +26,6 @@ class CreateCategoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('categories');
-    }    
+        Schema::dropIfExists('stopwords');
+    }
 }
