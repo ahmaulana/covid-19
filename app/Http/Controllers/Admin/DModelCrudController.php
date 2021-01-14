@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\DModelRequest;
 use App\Jobs\ModelJob;
+use App\Models\Dataset;
 use App\Models\DModel;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
@@ -149,14 +150,22 @@ class DModelCrudController extends CrudController
 
     protected function setupShowOperation()
     {
+        $this->crud->removeAllButtonsFromStack('line');
         $this->crud->denyAccess('delete');
     }
 
     public function store(DmodelRequest $request)
     {
-        dispatch(new ModelJob(request()->all()));
-        \Alert::add('success', 'Model sedang dibuat')->flash();
-        return \Redirect::to($this->crud->route);
+        //Check Dataset
+        $dataset = Dataset::count();
+        if($dataset){
+            dispatch(new ModelJob(request()->all()));
+            \Alert::add('success', 'Model sedang dibuat')->flash();
+            return \Redirect::to($this->crud->route);
+        } else {
+            \Alert::add('danger', 'Dataset masih kosong')->flash();
+            return \Redirect::to(backpack_url('dataset') . '/create');
+        }
     }
 
     public function update($id)

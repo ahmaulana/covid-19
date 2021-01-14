@@ -21,6 +21,7 @@ use Rubix\ML\Persisters\Filesystem;
 use Rubix\ML\Pipeline;
 use Rubix\ML\Transformers\TfIdfTransformer;
 use Rubix\ML\Transformers\WordCountVectorizer;
+use stdClass;
 
 class ModelJob implements ShouldQueue
 {
@@ -38,7 +39,7 @@ class ModelJob implements ShouldQueue
         $this->trainingLabels = [];
         $this->testingSamples = [];
         $this->testingLabels = [];
-        $this->data = $data;              
+        $this->data = $data;
     }
 
     /**
@@ -48,24 +49,42 @@ class ModelJob implements ShouldQueue
      */
     public function handle()
     {
-        $trainings = Dataset::select('text_prepro', 'label')->where('type','training')->get();
-        $testings = Dataset::select('text_prepro', 'label')->where('type','testing')->get();
+        $start_time = microtime(true);
+        $trainingData = Dataset::select('text_prepro', 'label')->where('type', 'training')->take(100)->get();
+        $testingData = Dataset::select('text_prepro', 'label')->where('type', 'testing')->take(100)->get();        
+
+        //Testing
+        //Count Emotion
+        $emotions = ['senang', 'sedih', 'marah', 'cinta', 'takut'];        
+        foreach ($emotions as $key => $emotion) {            
+            $total = Dataset::select('text_prepro', 'label')->where('type', 'training')->where('label', $emotion)->count();
+
+            //10% Training for Testing            
+            $take = floor(0.1 * $total);
+
+            //Starting Point
+            $start = $total - $take - 1;
+
+            $concat[$key] = Dataset::select('text_prepro', 'label')->where('type','training')->where('label', $emotion)->skip($start)->take($take)->get();
+        }                                        
 
         //Training
-        foreach ($trainings as $training) {
-            $this->trainingSamples[] = [$training->text_prepro];
-            $this->trainingLabels[] = $training->label;
+        foreach ($trainingData as $value) {
+            $this->trainingSamples[] = [$value->text_prepro];
+            $this->trainingLabels[] = $value->label;
         }
-        
+
         //Testing
-        foreach ($testings as $testing) {
-            $this->testingSamples[] = [$testing->text_prepro];
-            $this->testingLabels[] = $testing->label;
+        $testings = $testingData->concat($concat[0])->concat($concat[1])->concat($concat[2])->concat($concat[3])->concat($concat[4]);
+
+        foreach ($testings as $value) {
+            $this->testingSamples[] = [$value->text_prepro];
+            $this->testingLabels[] = $value->label;
         }
 
         $training = Labeled::build($this->trainingSamples, $this->trainingLabels);
         $testing = Labeled::build($this->testingSamples, $this->testingLabels);
-        
+
         $estimator = new PersistentModel(
             new Pipeline([
                 new WordCountVectorizer(10000, 3, 10000, new NGram(1, 2)),
@@ -86,14 +105,22 @@ class ModelJob implements ShouldQueue
         $results = $report->generate($predictions, $testing->labels());
         $estimator->save();
 
+        //end time
+        $end_time = microtime(true);
+        $execution_time = $end_time-$start_time;
+        
         //Check Active Model
         $actived = DModel::count() == 0 ? 1 : 0;
 
         //Save to DB
-        $fix_model = DModel::create([        
+        $fix_model = DModel::create([
             'model_name' => $this->data['model_name'],
             'model_desc' => $this->data['model_desc'],
             'accuracy' => $results[0]['overall']['accuracy'],
+            'f1_score' => $results[0]['overall']['f1_score'],
+            'precision' => $results[0]['overall']['precision'],
+            'recall' => $results[0]['overall']['recall'],
+            'execution_time' => $execution_time,
             'actived' => $actived
         ]);
     }

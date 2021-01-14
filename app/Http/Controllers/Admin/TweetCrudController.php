@@ -121,6 +121,7 @@ class TweetCrudController extends CrudController
 
     protected function setupShowOperation()
     {
+        $this->crud->removeAllButtonsFromStack('line');
         $this->crud->set('show.setFromDb', false);
         $this->crud->addColumn([
             'name' => 'post_id',

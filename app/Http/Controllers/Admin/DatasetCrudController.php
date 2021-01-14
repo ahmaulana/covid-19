@@ -170,6 +170,7 @@ class DatasetCrudController extends CrudController
 
     protected function setupShowOperation()
     {
+        $this->crud->removeAllButtonsFromStack('line');
         $this->crud->denyAccess('delete');
     }
 

@@ -18,7 +18,11 @@ class CreateDModelsTable extends Migration
             $table->string('model_name',32);
             $table->string('model_desc',280)->nullable();            
             $table->float('accuracy');
+            $table->float('f1_score');
+            $table->float('precision');
+            $table->float('recall');
             $table->boolean('actived')->default(0);
+            $table->float('execution_time');
             $table->timestamps();
         });
     }

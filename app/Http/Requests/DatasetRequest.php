@@ -26,7 +26,7 @@ class DatasetRequest extends FormRequest
     public function rules()
     {
         return [            
-            'dataset' => 'required|mimes:xlsx,xls|size:5120',
+            'dataset' => 'required|mimes:xlsx|max:5120',
         ];
     }
 

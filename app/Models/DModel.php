@@ -9,6 +9,6 @@ class DModel extends Model
 {
     use \Backpack\CRUD\app\Models\Traits\CrudTrait;
     use HasFactory;
-    protected $fillable = ['model_name','model_desc','accuracy','actived'];
+    protected $fillable = ['model_name','model_desc','accuracy','f1_score','precision','recall','execution_time','actived'];
     
 }
