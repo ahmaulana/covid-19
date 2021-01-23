@@ -14,6 +14,7 @@ Route::group([
 ], function () { // custom admin routes    
     Route::crud('tweet', 'TweetCrudController');    
 }); // this should be the absolute last line of this file
+
 Route::group([
     'prefix'     => config('backpack.base.route_prefix', 'admin'),
     'middleware' => array_merge(
@@ -25,5 +26,6 @@ Route::group([
     Route::crud('dataset', 'DatasetCrudController');
     Route::crud('dmodel', 'DModelCrudController');
     Route::crud('stopword', 'StopwordCrudController');
+    Route::crud('keyword', 'KeywordCrudController');
     Route::get('charts/daily-emotions', 'Charts\DailyEmotionsChartController@response')->name('charts.daily-emotions.index');
 }); // this should be the absolute last line of this file

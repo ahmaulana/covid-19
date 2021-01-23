@@ -44,43 +44,54 @@ class CrawlingService
         $last = Tweet::select("created_at")->latest()->first();
 
         //Choose model
-        $model = DModel::select('id', 'model_name')->where('actived',1)->first();
-        $estimator = PersistentModel::load(new Filesystem(storage_path() . '/model/' . $model->model_name . '.model'));
+        if (Dmodel::count() > 1) {
+            $active_model = DModel::select('id', 'model_name')->where('actived', 1)->first();
+            $model = $active_model->model_name;
+        } else {
+            $model = 'default';
+        }
+        $estimator = PersistentModel::load(new Filesystem(storage_path() . '/model/' . $model . '.model'));
         if (count($filter_tweet) === count($tweet_after_prepro)) {
             foreach ($filter_tweet as $key => $tweet) {
-                $insert_tweet = new Tweet;
-                $insert_classification = new Classification;                
-                $insert_tweet->post_id = $tweet['post_id'];
-                $insert_tweet->username = $tweet['username'];
-                $insert_tweet->tweet = $tweet['tweet'];
-                $insert_tweet->tweet_prepro = $tweet_after_prepro[$key]['result'];
-                $insert_tweet->word_cloud = $tweet_after_prepro[$key]['word_cloud'];
-                $insert_tweet->created_at = $tweet['created_at'];
-                $insert_tweet->save();
-
-                // Classification
-                $emotion = $estimator->predictSample([$tweet_after_prepro[$key]['result']]);
-
-                $insert_classification->model_id = $model->id;
-                $insert_classification->emotion = $emotion;
-                $insert_tweet->classification()->save($insert_classification);
+                if (strlen($tweet['tweet']) <= 280) {
+                    // Classification
+                    $emotion = $estimator->predictSample([$tweet_after_prepro[$key]['result']]);
+                    
+                    if($emotion){
+                        DB::transaction(function() use($tweet,$tweet_after_prepro,$key,$active_model,$emotion){
+                            $insert_tweet = new Tweet;
+                            $insert_classification = new Classification;
+                            $insert_tweet->post_id = $tweet['post_id'];
+                            $insert_tweet->username = $tweet['username'];
+                            $insert_tweet->tweet = $tweet['tweet'];
+                            $insert_tweet->tweet_prepro = $tweet_after_prepro[$key]['result'];
+                            $insert_tweet->word_cloud = $tweet_after_prepro[$key]['word_cloud'];
+                            $insert_tweet->created_at = $tweet['created_at'];
+                            $insert_tweet->save();                    
+        
+                            $insert_classification->model_id = $active_model->id;
+                            $insert_classification->emotion = $emotion;
+                            $insert_tweet->classification()->save($insert_classification);
+                        });
+                    }
+                }
             }
         }
         //Count The Emotions
         $now = Carbon::now()->toDateTimeString();
         $emotion_list = Classification::select('emotion', DB::raw('count(*) as total'))
-            ->join('tweets','tweet_id','tweets.id')->whereBetween('created_at', [$last->created_at,$now])->groupBy('emotion')
+            ->join('tweets', 'tweet_id', 'tweets.id')->whereBetween('created_at', [$last->created_at, $now])->orderBy('emotion', 'DESC')->groupBy('emotion')
             ->get();
         $emotions[] = (isset($emotion_list[0]->total) ? $emotion_list[0]->total : 0);
         $emotions[] = (isset($emotion_list[1]->total) ? $emotion_list[1]->total : 0);
         $emotions[] = (isset($emotion_list[2]->total) ? $emotion_list[2]->total : 0);
         $emotions[] = (isset($emotion_list[3]->total) ? $emotion_list[3]->total : 0);
-        $emotions[] = (isset($emotion_list[4]->total) ? $emotion_list[4]->total : 0);        
+        $emotions[] = (isset($emotion_list[4]->total) ? $emotion_list[4]->total : 0);
 
         //Total Emotion
         $total_emotion = Classification::select(DB::raw('count(*) as total'))
-        ->groupBy('emotion')
-        ->get()->toArray();        
-        event(new ChartEvent(['label' => Carbon::now()->addSecond(30)->toDateTimeString(),'emotion' => $emotions,'total' => $total_emotion]));
+            ->orderBy('emotion', 'DESC')->groupBy('emotion')
+            ->get()->toArray();
+        event(new ChartEvent(['label' => Carbon::now()->addSecond(30)->toDateTimeString(), 'emotion' => $emotions, 'total' => $total_emotion]));
     }
 }

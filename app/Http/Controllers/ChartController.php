@@ -17,7 +17,7 @@ class ChartController extends Controller
         $date = Carbon::parse($start_date)->toDateTimeString();
         for ($i = 0; $i < $count_days; $i++) {
             $emotion_list = Classification::select('emotion', DB::raw('count(*) as total'))
-                ->join('tweets','tweet_id','tweets.id')->whereDate('created_at', '=', $date)->groupBy('emotion')
+                ->join('tweets','tweet_id','tweets.id')->whereDate('created_at', '=', $date)->orderBy('emotion','DESC')->groupBy('emotion')
                 ->get();
             $emotions[0][] = (isset($emotion_list[0]->total) ? $emotion_list[0]->total : 0);
             $emotions[1][] = (isset($emotion_list[1]->total) ? $emotion_list[1]->total : 0);

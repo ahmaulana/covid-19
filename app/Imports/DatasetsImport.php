@@ -40,9 +40,9 @@ class DatasetsImport implements ToModel, WithValidation, WithBatchInserts, WithH
     public function rules(): array
     {
         return [
-            'text' => 'required|max:320',
-            'label' => 'required',
-            'type' => 'required'
+            'text' => 'required|max:320|unique:datasets',
+            'label' => 'required|in:senang,sedih,marah,cinta,takut',
+            'type' => 'required|in:training,testing'
         ];
     }
 

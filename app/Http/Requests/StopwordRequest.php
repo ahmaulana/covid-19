@@ -52,7 +52,7 @@ class StopwordRequest extends FormRequest
         return [
             'stopword.required' => 'Stopword tidak boleh kosong!',
             'stopword.unique' => 'Stopword sudah ada!',
-            'stopword.max' => 'Stopword tidak boleh lebih dari 32 karakter!',
+            'stopword.max' => 'Panjang Stopword minimal 1 maksimal 32 karakter!',
         ];
     }
 }

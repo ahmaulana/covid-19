@@ -26,7 +26,7 @@ class DModelRequest extends FormRequest
     public function rules()
     {
         return [
-            'model_name' => 'required|unique:d_models|max:20',
+            'model_name' => 'required|unique:d_models|max:32',
             'model_desc' => 'max:280',            
         ];
     }
@@ -52,8 +52,8 @@ class DModelRequest extends FormRequest
     {
         return [
             'model_name.required' => 'Nama model tidak boleh kosong!',
-            'model_name.unique' => 'Nama model sudah digunakan!',
-            'model_name.max' => 'Nama tidak boleh lebih dari 20 karakter!',
+            'model_name.unique' => 'Nama model sudah ada!',
+            'model_name.max' => 'Nama tidak boleh lebih dari 32 karakter!',
             'model_desc.max' => 'Panjang deskripsi maksimal 280 karakter!',
         ];
     }

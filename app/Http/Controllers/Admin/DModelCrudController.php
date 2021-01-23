@@ -170,6 +170,11 @@ class DModelCrudController extends CrudController
 
     public function update($id)
     {
+        request()->validate([
+            'model_desc' => 'max:280'
+        ],[
+            'model_desc.max' => 'Panjang deskripsi maksimal 280 karakter!'
+        ]);
         $status = DModel::find($id);
         if ($status->actived == 1) {
             \Alert::add('danger', 'Tidak dapat memperbarui model aktif!')->flash();

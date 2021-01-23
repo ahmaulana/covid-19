@@ -82,20 +82,7 @@ class DatasetCrudController extends CrudController
             'testing' => 'Testing',            
         ], function ($value) { // if the filter is active
             $this->crud->addClause('where', 'type', $value);
-        });
-
-        // select2 filter
-        // $this->crud->addFilter([
-        //     'type' => 'dropdown',
-        //     'name' => 'label',
-        //     'label' => 'Label',
-        // ],
-        // function() {
-        //     return Dataset::select('category_id','category')->join('categories','category_id','=','categories.id')->distinct()->get()->pluck('category', 'category_id')->toArray();
-        // },
-        // function($value) {
-        //     $this->crud->addClause('where', 'category_id', $value);
-        // });
+        });        
     }
 
     /**
@@ -184,9 +171,10 @@ class DatasetCrudController extends CrudController
     public function update()
     {
         request()->validate([
-            'text' => 'required|max:320'
+            'text' => 'required|min:100|max:320'
         ], [
             'text.required' => 'Teks tidak boleh kosong!',
+            'text.min' => 'Teks tidak boleh kurang dari 100 karakter!',
             'text.max' => 'Teks tidak boleh lebih dari 320 karakter!',
         ]);
 

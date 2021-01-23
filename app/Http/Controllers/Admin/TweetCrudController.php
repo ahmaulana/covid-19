@@ -66,12 +66,11 @@ class TweetCrudController extends CrudController
                 'label' => 'Emosi',
             ],
             function () {
-                return Tweet::select('emotion')->join('classifications', 'tweets.id', '=', 'tweet_id')->distinct()->get()->pluck('emotion', 'emotion')->toArray();
+                return Tweet::join('classifications', 'tweets.id', '=', 'tweet_id')->distinct()->get()->pluck('emotion', 'emotion')->toArray();
             },
-            function ($value) {
-                $this->value = $value;                
+            function ($value) {                
                 $query = Tweet::join('classifications','tweets.id','=','tweet_id')->where('emotion',$value);
-                return $this->crud->query = $query;                
+                return $this->crud->query = $query;
             }
         );
 

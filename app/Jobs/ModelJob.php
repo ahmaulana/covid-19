@@ -26,7 +26,7 @@ use stdClass;
 class ModelJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $trainingSamples, $trainingLabels, $testingSamples, $testingLabels, $data;
+    protected $data;
 
     /**
      * Create a new job instance.
@@ -34,11 +34,7 @@ class ModelJob implements ShouldQueue
      * @return void
      */
     public function __construct($data)
-    {
-        $this->trainingSamples = [];
-        $this->trainingLabels = [];
-        $this->testingSamples = [];
-        $this->testingLabels = [];
+    {        
         $this->data = $data;
     }
 
@@ -50,8 +46,8 @@ class ModelJob implements ShouldQueue
     public function handle()
     {
         $start_time = microtime(true);
-        $trainingData = Dataset::select('text_prepro', 'label')->where('type', 'training')->take(100)->get();
-        $testingData = Dataset::select('text_prepro', 'label')->where('type', 'testing')->take(100)->get();        
+        $trainingData = Dataset::select('text_prepro', 'label')->where('type', 'training')->get();
+        $testingData = Dataset::select('text_prepro', 'label')->where('type', 'testing')->get();        
 
         //Testing
         //Count Emotion
@@ -60,7 +56,7 @@ class ModelJob implements ShouldQueue
             $total = Dataset::select('text_prepro', 'label')->where('type', 'training')->where('label', $emotion)->count();
 
             //10% Training for Testing            
-            $take = floor(0.1 * $total);
+            $take = floor(0.15 * $total);
 
             //Starting Point
             $start = $total - $take - 1;
@@ -70,20 +66,20 @@ class ModelJob implements ShouldQueue
 
         //Training
         foreach ($trainingData as $value) {
-            $this->trainingSamples[] = [$value->text_prepro];
-            $this->trainingLabels[] = $value->label;
+            $trainingSamples[] = [$value->text_prepro];
+            $trainingLabels[] = $value->label;
         }
 
         //Testing
         $testings = $testingData->concat($concat[0])->concat($concat[1])->concat($concat[2])->concat($concat[3])->concat($concat[4]);
 
         foreach ($testings as $value) {
-            $this->testingSamples[] = [$value->text_prepro];
-            $this->testingLabels[] = $value->label;
+            $testingSamples[] = [$value->text_prepro];
+            $testingLabels[] = $value->label;
         }
 
-        $training = Labeled::build($this->trainingSamples, $this->trainingLabels);
-        $testing = Labeled::build($this->testingSamples, $this->testingLabels);
+        $training = Labeled::build($trainingSamples, $trainingLabels);
+        $testing = Labeled::build($testingSamples, $testingLabels);
 
         $estimator = new PersistentModel(
             new Pipeline([

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Keyword;
 use App\Crawling\CrawlingService;
 use Illuminate\Console\Command;
 
@@ -37,7 +38,13 @@ class TweetCrawl extends Command
      * @return int
      */
     public function handle()
-    {
-        CrawlingService::index('COVID',100);
+    {   
+        if(Keyword::count() > 0){
+            $active_keyword = Keyword::select('keyword')->where('status',1)->first();
+            $keyword = $active_keyword->keyword;
+        } else {
+            $keyword = 'COVID';
+        }        
+        CrawlingService::index($keyword,100);
     }
 }
