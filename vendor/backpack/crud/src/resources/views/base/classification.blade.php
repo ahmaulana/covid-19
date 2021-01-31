@@ -5,6 +5,17 @@
     .error {
         color: red;
     }
+    .app-header.bg-green .navbar-brand {
+        width: 250px;
+        justify-content: left;
+        font-size: 1.4rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .app-header .navbar-brand {
+            margin-left: -125px !important;
+        }
+    }
 </style>
 @endsection
 

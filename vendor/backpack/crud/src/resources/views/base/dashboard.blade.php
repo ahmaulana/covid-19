@@ -6,6 +6,18 @@
     .emotion-icon {
         max-width: 30% !important;
     }
+
+    .app-header.bg-green .navbar-brand {
+        width: 250px;
+        justify-content: left;
+        font-size: 1.4rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .app-header .navbar-brand {
+            margin-left: -125px !important;
+        }
+    }
 </style>
 @endsection
 @section('content')
@@ -54,14 +66,14 @@
 <div class="card">
     <div class="card-body">
         <div class="row">
-            <div class="col-sm-5">
-                <h4 class="card-title mb-0">Sistem Pengawasan Emosi Masyarakat</h4>
-                <div class="small text-muted">Sumber Data: Twitter</div>
+            <div class="col-sm-12">
+                <h4 class="card-title mb-0">Perkembangan Terkini Reaksi Publik</h4>
+                <div class="small text-muted">Periode: <b>1 jam terakhir</b></div>
             </div>
             <!-- /.col-->
         </div>
         <!-- /.row-->
-        <div class="chart-wrapper" style="height:300px;margin-top:40px;">
+        <div class="chart-wrapper" style="height:300px;margin-top:20px;">
             <div class="chartjs-size-monitor">
                 <div class="chartjs-size-monitor-expand">
                     <div class=""></div>
@@ -71,38 +83,36 @@
                 </div>
             </div>
             <canvas class="chart chartjs-render-monitor" id="main-chart" height="300" width="422" style="display: block; width: 422px; height: 300px;"></canvas>
-            <div id="main-chart-tooltip" class="chartjs-tooltip center" style="opacity: 0; left: 265.616px; top: 210.14px;">
-                <div class="tooltip-header">
-                    <div class="tooltip-header-item">T</div>
-                </div>
-                <div class="tooltip-body">
-                    <div class="tooltip-body-item"><span class="tooltip-body-item-color" style="background-color: rgb(70, 127, 208);"></span><span class="tooltip-body-item-label">My First dataset</span><span class="tooltip-body-item-value">161</span></div>
-                    <div class="tooltip-body-item"><span class="tooltip-body-item-color" style="background-color: rgb(66, 186, 150);"></span><span class="tooltip-body-item-label">My Second dataset</span><span class="tooltip-body-item-value">84</span></div>
-                    <div class="tooltip-body-item"><span class="tooltip-body-item-color" style="background-color: rgb(223, 71, 89);"></span><span class="tooltip-body-item-label">My Third dataset</span><span class="tooltip-body-item-value">65</span></div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 <div class="card">
-    <div class="card-header">Trend
-        <div class="card-header-actions">
-            <small class="text-muted">
-                <div class="form-group col-sm-12" element="div">
-                    <div class="input-group date">
-                        <input type="text" class="form-control" id="date-range">
-                        <div class="input-group-append">
-                            <span class="input-group-text">
-                                <span class="la la-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </small>
-        </div>
-    </div>
     <div class="card-body">
-        <div class="chart-wrapper">
+        <h4 class="card-title mb-2">Tren Reaksi Publik Waktu ke Waktu</h4>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="small text-muted">Periode: <b><span class="periode">-</span></b></div>
+                <div class="small text-muted">Terakhir diperbarui: <b><span class="last-updated">-</span></b></div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card-header-actions">
+                    <small class="text-muted">
+                        <div class="form-group col-sm-12" element="div">
+                            <div class="input-group date">
+                                <input type="text" class="form-control" id="date-range">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <span class="la la-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </small>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-->
+        <div class="chart-wrapper" style="height:300px;margin-top:10px;">
             <div class="chartjs-size-monitor">
                 <div class="chartjs-size-monitor-expand">
                     <div class=""></div>
@@ -111,40 +121,47 @@
                     <div class=""></div>
                 </div>
             </div>
-            <canvas id="filter-chart" style="display: block; width: 269px; height: 134px;" width="269" height="134" class="chartjs-render-monitor"></canvas>
+            <canvas id="filter-chart" class="chartjs-render-monitor" height="300" width="422" style="display: block; width: 422px; height: 300px;"></canvas>
         </div>
     </div>
 </div>
 <div class="card">
-    <div class="card-header" style="z-index: 10;">Word Cloud
-        <div class="card-header-actions">
-            <small class="text-muted">
-                <form id="form-word-cloud" class="form-inline">
-                    <div class="input-group">
-                        <select id="emotion" name="emotion" class="form-control mr-2">
-                            <option value="senang">Senang</option>
-                            <option value="sedih">Sedih</option>
-                            <option value="marah">Marah</option>
-                            <option value="cinta">Cinta</option>
-                            <option value="takut">Takut</option>
-                        </select>
-                        <div class="input-group date mr-2">
-                            <input type="text" class="form-control" id="date-range-word">
-                            <div class="input-group-append">
-                                <span class="input-group-text">
-                                    <span class="la la-calendar"></span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-sm btn-primary" type="submit">update</button>
-                        </div>
-                    </div>
-                </form>
-            </small>
-        </div>
+    <div class="card-header" style="z-index: 10;">
+        <h4 class="card-title mb-2">Topik Populer yang Dibahas</h4>
+        <div class="small text-muted">Periode: <b><span class="periode">-</span></b></div>
+        <div class="small text-muted">Terakhir diperbarui: <b><span class="last-updated">-</span></b></div>
     </div>
     <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card-header-actions">
+                    <small class="text-muted">
+                        <form id="form-word-cloud" class="form-inline">
+                            <div class="input-group">
+                                <select id="emotion" name="emotion" class="form-control mr-2">
+                                    <option value="senang">Senang</option>
+                                    <option value="sedih">Sedih</option>
+                                    <option value="marah">Marah</option>
+                                    <option value="cinta">Cinta</option>
+                                    <option value="takut">Takut</option>
+                                </select>
+                                <div class="input-group date mr-2">
+                                    <input type="text" class="form-control" id="date-range-word">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">
+                                            <span class="la la-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-sm btn-primary" type="submit">update</button>
+                                </div>
+                            </div>
+                        </form>
+                    </small>
+                </div>
+            </div>
+        </div>
         <div class="loader">
             <div class="half-circle-spinner d-flex justify-content-center">
                 <div class="circle circle-1"></div>
@@ -230,14 +247,14 @@
         type: 'line',
         data: {
             labels: label,
-            datasets: [{                
+            datasets: [{
                 label: 'Takut',
                 backgroundColor: 'transparent',
                 borderColor: 'grey',
                 pointHoverBackgroundColor: '#fff',
                 borderWidth: 2,
                 data: fear
-            }, {                
+            }, {
                 label: 'Cinta',
                 backgroundColor: 'transparent',
                 borderColor: 'pink',
@@ -259,19 +276,19 @@
                 borderWidth: 2,
                 data: sadness
             }, {
-                
+
                 label: 'Senang',
                 backgroundColor: 'transparent',
                 borderColor: 'yellow',
                 pointHoverBackgroundColor: '#fff',
                 borderWidth: 2,
-                data: happy                
+                data: happy
             }]
         },
         options: {
             maintainAspectRatio: false,
             legend: {
-                display: false
+                display: true
             },
             scales: {
                 xAxes: [{
@@ -281,6 +298,9 @@
                             minute: 'h:mm a'
                         }
                     },
+                    gridLines: {
+                        drawOnChartArea: false
+                    }
                 }],
                 yAxes: [{
                     ticks: {
@@ -296,6 +316,9 @@
                     hoverRadius: 4,
                     hoverBorderWidth: 3
                 }
+            },
+            tooltips: {
+                mode: 'index'
             }
         }
     });
@@ -310,8 +333,8 @@
                 borderColor: 'grey',
                 pointHoverBackgroundColor: '#fff',
                 borderWidth: 2,
-                data: []                
-            }, {                
+                data: []
+            }, {
                 label: 'Cinta',
                 backgroundColor: 'transparent',
                 borderColor: 'pink',
@@ -324,7 +347,7 @@
                 borderColor: 'red',
                 pointHoverBackgroundColor: '#fff',
                 borderWidth: 2,
-                data: []                
+                data: []
             }, {
                 label: 'Sedih',
                 backgroundColor: 'transparent',
@@ -338,17 +361,23 @@
                 borderColor: 'yellow',
                 pointHoverBackgroundColor: '#fff',
                 borderWidth: 2,
-                data: []                
+                data: []
             }]
         },
         options: {
-            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                display: true
+            },
             scales: {
                 xAxes: [{
                     type: 'time',
                     time: {
                         unit: 'day'
                     },
+                    gridLines: {
+                        drawOnChartArea: false
+                    }
                 }],
                 yAxes: [{
                     ticks: {
@@ -357,6 +386,17 @@
                     }
                 }]
             },
+            elements: {
+                point: {
+                    radius: 2,
+                    hitRadius: 10,
+                    hoverRadius: 4,
+                    hoverBorderWidth: 3
+                }
+            },
+            tooltips: {
+                mode: 'index'
+            }
         }
     });
 
@@ -389,6 +429,11 @@
                 endDate: end
             },
             success: function(data) {
+                //convert date
+                let startDate = moment(start);
+                let endDate = moment(end);
+                $(".periode").text(startDate.format("DD/MM/YYYY") + " hingga " + endDate.format("DD/MM/YYYY"));
+                $(".last-updated").text(moment().format("DD/MM/YYYY, h:mm:ss a"));
                 updateChartData(lineChart, data);
             }
         });
@@ -417,7 +462,7 @@
             },
             dataType: "json",
             beforeSend: function() {
-                $(".loader").toggleClass('d-none');                
+                $(".loader").toggleClass('d-none');
             },
             success: function(data) {
                 $(".loader").toggleClass('d-none');

@@ -6,5 +6,6 @@
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('keyword') }}'><i class='nav-icon la la-key'></i> Keyword</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ backpack_url('dmodel') }}'><i class='nav-icon la la-file-text-o'></i> Model</a></li>
 @endif
-<li class='nav-item'><a class='nav-link' href="{{ url('klasifikasi') }}"><i class='nav-icon la la-gears'></i> Klasifikasi</a></li>
 <li class='nav-item'><a class='nav-link' href='{{ url('tweet') }}'><i class='nav-icon la la-twitter'></i> Tweets</a></li>
+<li class='nav-item'><a class='nav-link' href="{{ url('klasifikasi') }}"><i class='nav-icon la la-gears'></i> Klasifikasi</a></li>
+<li class='nav-item'><a class='nav-link' href="{{ url('export') }}"><i class='nav-icon la la-download'></i> Export Data</a></li>
