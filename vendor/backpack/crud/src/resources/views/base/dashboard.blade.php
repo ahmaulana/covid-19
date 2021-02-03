@@ -5,19 +5,7 @@
 <style>
     .emotion-icon {
         max-width: 30% !important;
-    }
-
-    .app-header.bg-green .navbar-brand {
-        width: 250px;
-        justify-content: left;
-        font-size: 1.4rem;
-    }
-
-    @media (max-width: 991.98px) {
-        .app-header .navbar-brand {
-            margin-left: -125px !important;
-        }
-    }
+    }    
 </style>
 @endsection
 @section('content')
@@ -128,8 +116,8 @@
 <div class="card">
     <div class="card-header" style="z-index: 10;">
         <h4 class="card-title mb-2">Topik Populer yang Dibahas</h4>
-        <div class="small text-muted">Periode: <b><span class="periode">-</span></b></div>
-        <div class="small text-muted">Terakhir diperbarui: <b><span class="last-updated">-</span></b></div>
+        <div class="small text-muted">Periode: <b><span class="periode-word">-</span></b></div>
+        <div class="small text-muted">Terakhir diperbarui: <b><span class="last-updated-word">-</span></b></div>
     </div>
     <div class="card-body">
         <div class="row">
@@ -154,7 +142,7 @@
                                     </div>
                                 </div>
                                 <div class="input-group-append">
-                                    <button class="btn btn-sm btn-primary" type="submit">update</button>
+                                    <button class="btn btn-sm btn-primary" id="update-word-cloud" type="submit">update</button>
                                 </div>
                             </div>
                         </form>
@@ -210,6 +198,7 @@
         $("#date-range-word").daterangepicker({
             maxDate: new Date(),
             alwaysShowCalendars: true,
+            dateLimit: { days: 7 },
             locale: {
                 format: 'DD/MM/YYYY'
             },
@@ -217,10 +206,7 @@
             ranges: {
                 'Today': [moment(), moment()],
                 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],                
             },
             startDate: moment(),
             endDate: moment()
@@ -431,7 +417,7 @@
             success: function(data) {
                 //convert date
                 let startDate = moment(start);
-                let endDate = moment(end);
+                let endDate = moment(end);                
                 $(".periode").text(startDate.format("DD/MM/YYYY") + " hingga " + endDate.format("DD/MM/YYYY"));
                 $(".last-updated").text(moment().format("DD/MM/YYYY, h:mm:ss a"));
                 updateChartData(lineChart, data);
@@ -463,12 +449,18 @@
             dataType: "json",
             beforeSend: function() {
                 $(".loader").toggleClass('d-none');
+                $("#update-word-cloud").attr("disabled", true);
             },
             success: function(data) {
                 $(".loader").toggleClass('d-none');
+                $("#update-word-cloud").attr("disabled", false);
                 WordCloud(document.getElementById('word-cloud'), {
                     list: data
                 });
+                let startDate = moment(start);
+                let endDate = moment(end);                
+                $(".periode-word").text(startDate.format("DD/MM/YYYY") + " hingga " + endDate.format("DD/MM/YYYY"));
+                $(".last-updated-word").text(moment().format("DD/MM/YYYY, h:mm:ss a"));
             }
         });
     }

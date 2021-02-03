@@ -10,45 +10,20 @@
     .emotion-icon {
         max-width: 30% !important;
     }
-
-    .app-header.bg-green .navbar-brand {
-        width: 250px;
-        justify-content: left;
-        font-size: 1.4rem;
-    }
-
-    @media (max-width: 991.98px) {
-        .app-header .navbar-brand {
-            margin-left: -125px !important;
-        }
-    }
 </style>
 @endsection
 @section('content')
 <h2>
-    <span class="text-capitalize">Export Data</span>
+    <span class="text-capitalize">Cetak Laporan</span>
 </h2>
 <div class="row">
-    <div class="col-lg-12">
+    <div class="col-md-6">
         <div class="card">
-            <form id="form-export" class="form-horizontal" action="{{ route('export.process') }}" method="post">
-                <div class="card-header">Export data berdasarkan jenis emosi dan rentang waktu</div>
+            <form id="form-export" class="form-horizontal">
+                <div class="card-header">Cetak laporan berdasarkan rentang tanggal</div>
                 <div class="card-body">
                     <div class="form-group row">
-                        <label class="col-md-3 col-form-label" for="emotion">Pilih Emosi</label>
-                        <div class="col-md-9">
-                            <select id="emotion" name="emotion" class="form-control mr-2">
-                                <option value="">Pilih emosi...</option>
-                                <option value="senang">Senang</option>
-                                <option value="sedih">Sedih</option>
-                                <option value="marah">Marah</option>
-                                <option value="cinta">Cinta</option>
-                                <option value="takut">Takut</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-md-3 col-form-label" for="date-range">Rentang Tanggal</label>
+                        <label class="col-md-3 col-form-label" for="date-range">Tanggal</label>
                         <div class="col-md-9">
                             <div class="input-group date">
                                 <input type="text" class="form-control" id="date-range">
@@ -63,13 +38,52 @@
                 </div>
                 <div class="card-footer">
                     <div class="form-actions">
-                        <button class="btn btn-primary" type="submit">Export</button>
+                        <button class="btn btn-primary" type="submit">Cetak</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- /.col-->
+    <div class="col-md-6">
+        <div class="card">
+            <form id="form-export-word" class="form-horizontal">
+                <div class="card-header">Cetak topik populer berdasarkan emosi</div>
+                <div class="card-body">
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label" for="date-range-word">Tanggal</label>
+                        <div class="col-md-9">
+                            <div class="input-group date">
+                                <input type="text" class="form-control" id="date-range-word">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <span class="la la-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label" for="select1">Emosi</label>
+                        <div class="col-md-9">
+                            <select class="form-control" id="emotion" name="emotion">
+                                <option value="">Pilih emosi...</option>
+                                <option value="Senang">Senang</option>
+                                <option value="Sedih">Sedih</option>
+                                <option value="Marah">Marah</option>
+                                <option value="Cinta">Cinta</option>
+                                <option value="Takut">Takut</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Cetak</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection
 @section('after_scripts')
@@ -81,7 +95,7 @@
                 <h4 class="modal-title">File sedang diproses, mohon tunggu...</h4>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="export-container">
                 <h5 class="card-title mb-2">Sistem Pengawasan Reaksi Publik untuk COVID-19</h5>
                 <div class="loader">
                     <div class="half-circle-spinner d-flex justify-content-center">
@@ -149,21 +163,61 @@
                     </div>
                     <canvas id="filter-chart" class="chartjs-render-monitor" height="300" width="422" style="display: block; width: 422px; height: 300px;"></canvas>
                 </div>
-                <div id="export-word-cloud"></div>
             </div>
             <div class="modal-footer">
-                <div class="row">
-                    <div class="small text-muted mr-2">Emosi: <b><span class="tipe-emosi">-</span></b></div>
-                    <div class="small text-muted">Rentang: <b><span class="rentang-tanggal">-</span></b></div>
-                </div>
                 <div class="form-inline">
                     <div class="input-group">
                         <select id="export-file" name="export-file" class="form-control mr-2">
-                            <option value="pdf">PDF</option>
                             <option value="png">PNG</option>
+                            <option value="pdf">PDF</option>
                         </select>
                         <div class="input-group-append">
-                            <button class="btn btn-sm btn-primary" onclick="print()" type="submit">Download</button>
+                            <button class="btn btn-sm btn-primary" onclick="print('export-file','export-container')" type="submit">Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content-->
+    </div>
+    <!-- /.modal-dialog-->
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exportWordModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">File sedang diproses, mohon tunggu...</h4>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+            </div>
+            <div class="modal-body" id="export-word-container">
+                <h5 class="card-title mb-2">Sistem Pengawasan Reaksi Publik untuk COVID-19</h5>
+                <div class="loader">
+                    <div class="half-circle-spinner d-flex justify-content-center">
+                        <div class="circle circle-1"></div>
+                        <div class="circle circle-2"></div>
+                    </div>
+                    <div class="overlay"></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="small text-muted">Emosi: <b><span class="emotion">-</span></b></div>
+                        <div class="small text-muted">Tanggal: <b><span class="periode">-</span></b></div>
+                        <div class="small text-muted">Terakhir diperbarui: <b><span class="last-updated">-</span></b></div>
+                    </div>
+                </div>
+                <div id="export-word-cloud"></div>
+            </div>
+            <div class="modal-footer">
+                <div class="form-inline">
+                    <div class="input-group">
+                        <select id="export-file-word" name="export-file-word" class="form-control mr-2">
+                            <option value="png">PNG</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-primary" onclick="print('export-file-word','export-word-container')" type="submit">Download</button>
                         </div>
                     </div>
                 </div>
@@ -203,16 +257,27 @@
             endDate: moment()
         });
 
+        //Initialize Date Range
+        $("#date-range-word").daterangepicker({
+            maxDate: new Date(),
+            alwaysShowCalendars: true,
+            dateLimit: { days: 7 },
+            locale: {
+                format: 'DD/MM/YYYY'
+            },
+
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],                
+            },
+            startDate: moment(),
+            endDate: moment()
+        });
+
         //Submit Form        
         $("#form-export").validate({
-            rules: {
-                emotion: "required",
-            },
-            messages: {
-                emotion: "Emosi tidak boleh kosong!",
-            },
             submitHandler: function(form) {
-                let emotion = ['senang', 'sedih', 'marah', 'cinta', 'takut'];
                 var start = moment($("#date-range").data('daterangepicker').startDate._d).format('Y-MM-DD');
                 var end = moment($("#date-range").data('daterangepicker').endDate._d).format('Y-MM-DD');
                 $("#exportModal").modal("toggle");
@@ -221,6 +286,7 @@
                     backdrop: 'static',
                     keyboard: false
                 });
+
                 $(".loader").toggleClass("d-none");
                 $(".close").toggleClass("d-none");
                 $(":submit, #export-file").prop("disabled", true);
@@ -228,13 +294,34 @@
 
                 $.when(
                     getChartData(start, end),
-                    emotion.forEach(element => getWordCloud(element, start, end))
-                ).then(function() {
+                ).done(function() {
                     $(".loader").toggleClass("d-none");
                     $(":submit, #export-file").prop("disabled", false);
                     $(".close").toggleClass("d-none");
                     $(".modal-title").text("File siap diunduh");
                 });
+            }
+        });
+
+        $("#form-export-word").validate({
+            rules: {
+                emotion: "required",
+            },
+            messages: {
+                emotion: "Emosi tidak boleh kosong!",
+            },
+            submitHandler: function(form) {
+                var start = moment($("#date-range-word").data('daterangepicker').startDate._d).format('Y-MM-DD');
+                var end = moment($("#date-range-word").data('daterangepicker').endDate._d).format('Y-MM-DD');
+                var emotion = $("#emotion").val();
+                $("#exportWordModal").modal("toggle");
+                //Modal
+                $('#exportWordModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+
+                getWordCloud(emotion, start, end);
             }
         });
     });
@@ -317,7 +404,7 @@
     function getChartData(start, end) {
         //Get data by AJAX        
         var url = "<?= route("chart.read") ?>";
-        $.ajax({
+        return $.ajax({
             method: "POST",
             url: url,
             data: {
@@ -350,7 +437,7 @@
 
     function getWordCloud(emotion, start, end) {
         var url = "<?= route('word.cloud') ?>";
-        $.ajax({
+        return $.ajax({
             url: url,
             method: "POST",
             data: {
@@ -359,33 +446,75 @@
                 endDate: end
             },
             dataType: "json",
+            beforeSend: function() {
+                //Reset Word Cloud
+                $("#export-word-cloud").empty();
+
+                $(".loader").toggleClass("d-none");
+                $(".close").toggleClass("d-none");
+                $(":submit, #export-file-word").prop("disabled", true);
+                $(".modal-title").text("File sedang diproses, mohon tunggu...");
+            },
             success: function(data) {
                 let exportEmotion = '<div class="card">' +
-                    '<div class="card-header"> Emosi <b>'+ emotion +'</b>' +                    
-                    '</div>' +
                     '<div class="card-body">' +
-                    '<div id="export-'+ emotion +'" class="w-100" style="height:300px"></div>' +
+                    '<div id="export-' + emotion + '" class="w-100" style="height:300px"></div>' +
                     '</div>' +
                     '</div>';
                 $("#export-word-cloud").append(exportEmotion);
-                WordCloud($("#export-"+ emotion)[0], {
+                WordCloud($("#export-" + emotion)[0], {
                     list: data
                 });
+                $(".loader").toggleClass("d-none");
+                $(".modal-title").text("File siap diunduh");
+                let startDate = moment(start);
+                let endDate = moment(end);
+                $(".periode").text(startDate.format("DD/MM/YYYY") + " hingga " + endDate.format("DD/MM/YYYY"));
+                $(".last-updated").text(moment().format("DD/MM/YYYY, h:mm:ss a"));
+                $(".emotion").text(emotion);
+                $(":submit, #export-file-word").prop("disabled", false);
+                $(".close").toggleClass("d-none");
             }
         });
     }
 
-    function print(quality = 2) {
-        const filename = 'ThisIsYourPDFFilename.pdf';
-        html2canvas(document.querySelector('.modal-body'), {
-            scale: quality
+    function print(type, container, quality = 2) {
+        const filename = 'Report.pdf';
+        html2canvas(document.querySelector('#' + container), {
+            scale: quality,
+            scrollX: 0,
+            scrollY: 0
         }).then(canvas => {
-            let height = $(".modal-body").height();
-            let width = $(".modal-body").width();            
-            let pdf = new jsPDF('p', 'px', [width, height]);
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, width, height);
-            pdf.save(filename);
+            if ($("#" + type).val() == 'png') {
+                saveAs(canvas.toDataURL(), 'Report.png');
+            } else {
+                let height = $('#' + container).height();
+                let width = $('#' + container).width();
+                let orientation = width > height ? 'l' : 'p';
+                let pdf = new jsPDF(orientation, 'px', [width, height]);
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, width, height);
+                pdf.save(filename);
+            }
         });
+    }
+
+    function saveAs(uri, filename) {
+        var link = document.createElement('a');
+        if (typeof link.download === 'string') {
+            link.href = uri;
+            link.download = filename;
+
+            //Firefox requires the link to be in the body
+            document.body.appendChild(link);
+
+            //simulate click
+            link.click();
+
+            //remove the link when done
+            document.body.removeChild(link);
+        } else {
+            window.open(uri);
+        }
     }
 </script>
 @endsection

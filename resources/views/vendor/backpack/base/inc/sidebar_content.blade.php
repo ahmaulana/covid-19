@@ -8,4 +8,4 @@
 @endif
 <li class='nav-item'><a class='nav-link' href='{{ url('tweet') }}'><i class='nav-icon la la-twitter'></i> Tweets</a></li>
 <li class='nav-item'><a class='nav-link' href="{{ url('klasifikasi') }}"><i class='nav-icon la la-gears'></i> Klasifikasi</a></li>
-<li class='nav-item'><a class='nav-link' href="{{ url('export') }}"><i class='nav-icon la la-download'></i> Export Data</a></li>
+<li class='nav-item'><a class='nav-link' href="{{ url('cetak') }}"><i class='nav-icon la la-print'></i> Cetak Laporan</a></li>
