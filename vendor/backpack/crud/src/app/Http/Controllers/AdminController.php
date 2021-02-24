@@ -5,6 +5,7 @@ namespace Backpack\CRUD\app\Http\Controllers;
 use App\Models\Classification;
 use App\Models\DetailTweet;
 use App\Models\DModel;
+use App\Models\Tweet;
 use App\Preprocessing\PreprocessingService;
 use Carbon\Carbon;
 use Illuminate\Routing\Controller;
@@ -87,6 +88,12 @@ class AdminController extends Controller
         $estimator = PersistentModel::load(new Filesystem(storage_path() . '/model/' . $data['model'] . '.model'));
         $prediction = $estimator->predictSample([$pre_pro[0]['result']]);        
         return array($pre_pro[0]['result'], $prediction);
+    }
+
+    public function tweet()
+    {
+        $tweets = Tweet::select("tweet","username")->orderBy("id", "DESC")->take(50)->get();
+        return $tweets;
     }
 
     /**

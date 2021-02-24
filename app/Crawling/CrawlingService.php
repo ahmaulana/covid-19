@@ -22,9 +22,9 @@ class CrawlingService
         //Last ID
         $last_id = Tweet::select('post_id')->orderBy('id', 'DESC')->first();
         if ($last_id == null) {
-            $tweets = Twitter::getSearch(['q' => $keyword . ' -RT', 'tweet_mode' => 'extended', 'lang' => 'id', 'count' => $count, 'format' => 'array']);
+            $tweets = Twitter::getSearch(['q' => $keyword . ' -RT -filter:links', 'tweet_mode' => 'extended', 'lang' => 'id', 'count' => $count, 'format' => 'array']);
         } else {
-            $tweets = Twitter::getSearch(['q' => $keyword . ' -RT', 'tweet_mode' => 'extended', 'lang' => 'id', 'count' => $count, 'since_id' => intval($last_id['post_id']), 'format' => 'array']);
+            $tweets = Twitter::getSearch(['q' => $keyword . ' -RT -filter:links -filter:replies', 'tweet_mode' => 'extended', 'lang' => 'id', 'count' => $count, 'since_id' => intval($last_id['post_id']), 'format' => 'array']);
         }
 
         foreach (array_reverse($tweets['statuses']) as $key => $value) {

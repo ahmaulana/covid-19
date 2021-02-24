@@ -64,7 +64,7 @@ class WordCloudController extends Controller
             $i = 0;
 
             do {
-                if ($keyword_score[$i]['word'] == 'covid' || strlen($keyword_score[$i]['word']) <= 3) {
+                if ($keyword_score[$i]['word'] == 'covid' || $keyword_score[$i]['word'] == 'corona' || strlen($keyword_score[$i]['word']) <= 3) {
                     array_splice($keyword_score, $i, 1);
                 } else {
                     $i++;

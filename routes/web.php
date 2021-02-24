@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [AdminController::class, 'dashboard'])->name('backpack.dashboard');
 Route::get('klasifikasi', [AdminController::class, 'classification'])->name('backpack.classification');
 Route::post('classification-process', [AdminController::class, 'classification_process'])->name('classification.process');
+Route::post('/get-tweet',[AdminController::class, 'tweet'])->name('tweet');
 Route::get('/admin', [AdminController::class, 'redirect'])->name('backpack');
 
 Route::post('/chart/read-data', [ChartController::class, 'index'])->name('chart.read');
@@ -28,3 +29,4 @@ Route::post('/word-cloud', [WordCloudController::class, 'index'])->name('word.cl
 
 Route::get('/cetak',[ExportController::class, 'index'])->name('cetak');
 Route::post('/export-process',[ExportController::class, 'export'])->name('export.process');
+

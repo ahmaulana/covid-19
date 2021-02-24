@@ -5,7 +5,40 @@
 <style>
     .emotion-icon {
         max-width: 30% !important;
-    }    
+    }
+
+    @keyframes placeHolderShimmer {
+        0% {
+            background-position: -468px 0
+        }
+
+        100% {
+            background-position: 468px 0
+        }
+    }
+
+    .animated-background {
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+        animation-iteration-count: infinite;
+        animation-name: placeHolderShimmer;
+        animation-timing-function: linear;
+        background: #f6f7f8;
+        background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
+        background-size: 1000px 104px;
+        height: 200px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tweet-logo {
+        width: 25%;
+        min-width: 75px;
+    }
+
+    .text {
+        height: 200px;
+    }
 </style>
 @endsection
 @section('content')
@@ -55,7 +88,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-sm-12">
-                <h4 class="card-title mb-0">Perkembangan Terkini Reaksi Publik</h4>
+                <h4 class="card-title mb-0">Perkembangan Terkini Tanggapan Publik</h4>
                 <div class="small text-muted">Periode: <b>1 jam terakhir</b></div>
             </div>
             <!-- /.col-->
@@ -76,7 +109,7 @@
 </div>
 <div class="card">
     <div class="card-body">
-        <h4 class="card-title mb-2">Tren Reaksi Publik Waktu ke Waktu</h4>
+        <h4 class="card-title mb-2">Tren Tanggapan Publik Waktu ke Waktu</h4>
         <div class="row">
             <div class="col-sm-6">
                 <div class="small text-muted">Periode: <b><span class="periode">-</span></b></div>
@@ -162,9 +195,44 @@
         </div>
     </div>
 </div>
+<div class="card">
+    <div class="card-header" style="z-index: 10;">
+        <h4 class="card-title mb-2">Tweet Masyarakat</h4>
+        <div class="small text-muted">Terakhir diperbarui: <b><span class="last-updated-tweet">-</span></b></div>
+    </div>
+    <div class="card-body">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 col-xl-8 mx-auto">
+                    <div class="p-4 bg-white shadow rounded">
+                        <!-- Bootstrap carousel-->
+                        <div class="carousel slide carousel-fade" id="carouselExampleIndicators">
+
+                            <!-- Bootstrap inner [slides]-->
+                            <div class="carousel-inner">
+                                <img src="https://assets.stickpng.com/images/580b57fcd9996e24bc43c53e.png" class="rounded mx-auto d-block tweet-logo" alt="...">
+                                <div class="tweet-loader">
+                                    <!-- Carousel slide-->
+                                    <div class="animated-background">
+                                        <div class="media">
+                                            <div class="media-body ml-3">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="carousel-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('after_scripts')
 <script src="/packages/wordcloud/wordcloud2.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script>
@@ -174,6 +242,12 @@
 
         var total = <?= json_encode($total) ?>;
         countEmotion(total);
+
+        //Tweet Slider
+        getTweet();
+        setInterval(function() {
+            getTweet();
+        }, 300000);
 
         //Initialize Date Range
         $("#date-range").daterangepicker({
@@ -198,7 +272,9 @@
         $("#date-range-word").daterangepicker({
             maxDate: new Date(),
             alwaysShowCalendars: true,
-            dateLimit: { days: 7 },
+            dateLimit: {
+                days: 7
+            },
             locale: {
                 format: 'DD/MM/YYYY'
             },
@@ -206,7 +282,7 @@
             ranges: {
                 'Today': [moment(), moment()],
                 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],                
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
             },
             startDate: moment(),
             endDate: moment()
@@ -417,7 +493,7 @@
             success: function(data) {
                 //convert date
                 let startDate = moment(start);
-                let endDate = moment(end);                
+                let endDate = moment(end);
                 $(".periode").text(startDate.format("DD/MM/YYYY") + " hingga " + endDate.format("DD/MM/YYYY"));
                 $(".last-updated").text(moment().format("DD/MM/YYYY, h:mm:ss a"));
                 updateChartData(lineChart, data);
@@ -458,9 +534,45 @@
                     list: data
                 });
                 let startDate = moment(start);
-                let endDate = moment(end);                
+                let endDate = moment(end);
                 $(".periode-word").text(startDate.format("DD/MM/YYYY") + " hingga " + endDate.format("DD/MM/YYYY"));
                 $(".last-updated-word").text(moment().format("DD/MM/YYYY, h:mm:ss a"));
+            }
+        });
+    }
+
+    function getTweet() {
+        var url = "<?= route('tweet') ?>";
+        $.ajax({
+            url: url,
+            method: "POST",
+            dataType: "json",
+            beforeSend: function() {
+                $(".carousel-content").empty();
+                $(".tweet-loader").removeClass("d-none");
+            },
+            success: function(data) {
+                $(".tweet-loader").addClass("d-none");
+                $.each(data, function(index, value) {
+                    let active = index == 0 ? "active" : "";
+                    let carousel = '<div class="carousel-item ' + active + '">' +
+                        '<div class="media">' +
+                        '<div class="media-body ml-3">' +
+                        '<blockquote class="blockquote border-0 p-0">' +
+                        '<p class="font-italic lead"> <i class="nav-icon la la-quote-left"></i>' + value.tweet + '<i class="nav-icon la la-quote-right"></i></p>' +
+                        '<footer class="blockquote-footer">' + value.username +
+                        '</footer>' +
+                        '</blockquote>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>'
+                    $(".carousel-content").append(carousel);
+                });
+                $(".carousel").carousel({
+                    interval: 6000,
+                    pause: false
+                });
+                $(".last-updated-tweet").text(moment().format("DD/MM/YYYY, h:mm:ss a"));
             }
         });
     }

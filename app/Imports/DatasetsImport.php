@@ -32,8 +32,8 @@ class DatasetsImport implements ToModel, WithValidation, WithBatchInserts, WithH
         return new Dataset([
             'text' => $row['text'],
             'text_prepro' => $prepro_train[0]['result'],            
-            'label' => $row['label'],
-            'type' => $row['type']
+            'label' => strtolower($row['label']),
+            'type' => strtolower($row['type'])
         ]);
     }
 
