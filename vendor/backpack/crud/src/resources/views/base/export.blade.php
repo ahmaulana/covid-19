@@ -96,7 +96,7 @@
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body" id="export-container">
-                <h5 class="card-title mb-2">Sistem Pengawasan Reaksi Publik untuk COVID-19</h5>
+                <h5 class="card-title mb-2">Sistem Monitoring Reaksi Publik Covid-19</h5>
                 <div class="loader">
                     <div class="half-circle-spinner d-flex justify-content-center">
                         <div class="circle circle-1"></div>
@@ -192,7 +192,7 @@
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
             </div>
             <div class="modal-body" id="export-word-container">
-                <h5 class="card-title mb-2">Sistem Pengawasan Reaksi Publik untuk COVID-19</h5>
+                <h5 class="card-title mb-2">Sistem Monitoring Reaksi Publik Covid-19</h5>
                 <div class="loader">
                     <div class="half-circle-spinner d-flex justify-content-center">
                         <div class="circle circle-1"></div>

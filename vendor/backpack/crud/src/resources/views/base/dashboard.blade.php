@@ -231,12 +231,12 @@
 </div>
 @endsection
 @section('after_scripts')
-<script src="/packages/wordcloud/wordcloud2.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="/packages/wordcloud/wordcloud2.js"></script>
 <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function() {        
         //Loader
         $(".loader").toggleClass('d-none');
 
